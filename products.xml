@@ -1,6 +1,13 @@
 <?xml version='1.0' encoding='utf-8'?>
 <products>
   <product>
+    <id>3</id>
+    <name>Lip Gloss Limited Edition Coconut з пептидами та вітаміном С</name>
+    <sku />
+    <price>850</price>
+    <quantity>0</quantity>
+  </product>
+  <product>
     <id>1</id>
     <name>Lip Gloss Limited Edition Crystal Caramel з пептидами та вітаміном С</name>
     <sku>LGLECCPC</sku>
