@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<products>
+  <product>
+    <id>2</id>
+    <name>Доставка</name>
+    <sku>delivery</sku>
+    <price>0</price>
+    <quantity>0</quantity>
+  </product>
+  <product>
+    <id>1</id>
+    <name>Lip Gloss Limited Edition Crystal Caramel з пептидами та вітаміном С</name>
+    <sku>LGLECCPC</sku>
+    <price>850</price>
+    <quantity>0</quantity>
+  </product>
+</products>
