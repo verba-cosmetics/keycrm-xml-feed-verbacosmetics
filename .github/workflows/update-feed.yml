@@ -4,7 +4,7 @@ name: Update KeyCRM XML feed
 on:
   workflow_dispatch:
   schedule:
-    - cron: "7,37 * * * *"
+    - cron: "*/15 * * * *"
 
 permissions:
   contents: write
