@@ -1,6 +1,13 @@
 <?xml version='1.0' encoding='utf-8'?>
 <products>
   <product>
+    <id>4</id>
+    <name>Крем для рук Ceshemere Dream</name>
+    <sku />
+    <price>490</price>
+    <quantity>0</quantity>
+  </product>
+  <product>
     <id>3</id>
     <name>Lip Gloss Limited Edition Coconut з пептидами та вітаміном С</name>
     <sku />
