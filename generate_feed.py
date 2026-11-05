@@ -1,212 +1,214 @@
-
+"""Generate EVA-compatible YML feed from KeyCRM catalog offers."""
 import os
-import requests
+import re
 import xml.etree.ElementTree as ET
+from collections import defaultdict
+from datetime import datetime
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
+from urllib.parse import quote, urlsplit
+from zoneinfo import ZoneInfo
+
+import requests
 
 BASE_URL = "https://openapi.keycrm.app/v1"
-API_KEY = os.environ["KEYCRM_API_KEY"]
 OUTPUT = Path("products.xml")
 CATEGORY_NAME = "Продукти"
+VENDOR = "Verba Cosmetics"
 
-session = requests.Session()
-session.headers.update({
-    "Authorization": f"Bearer {API_KEY}",
-    "Accept": "application/json",
-})
+# Stable EVA feed category IDs. Set eva_id only after confirming EVA catalog IDs.
+FEED_CATEGORIES = {
+    "cream": ("101", "Креми для рук"),
+    "gloss": ("102", "Блиски для губ"),
+}
+
+# Whitelist SKU: other KeyCRM products (including delivery) are never exported.
+# Ukrainian copy below should be approved before publishing to EVA.
+CATALOG = {
+    "BHCCD": {
+        "category": "cream",
+        "name": "Крем для рук Verba Cosmetics Cashmere Dream бар'єрний",
+        "description": "Бар'єрний крем для рук Verba Cosmetics Cashmere Dream для щоденного догляду за шкірою рук.",
+        "params": {"Тип засобу": "Крем для рук", "Призначення": "Догляд за шкірою рук"},
+    },
+    "LGC": {
+        "category": "gloss",
+        "name": "Блиск для губ Verba Cosmetics Coconut з пептидами та вітаміном C 15 мл",
+        "description": "Блиск для губ Verba Cosmetics Coconut з пептидами та вітаміном C для декоративного макіяжу губ.",
+        "params": {"Тип засобу": "Блиск для губ", "Об'єм": "15 мл"},
+    },
+    "LGLECCPC": {
+        "category": "gloss",
+        "name": "Блиск для губ Verba Cosmetics Crystal Caramel з пептидами та вітаміном C 15 мл",
+        "description": "Блиск для губ Verba Cosmetics Crystal Caramel з пептидами та вітаміном C для декоративного макіяжу губ.",
+        "params": {"Тип засобу": "Блиск для губ", "Об'єм": "15 мл"},
+    },
+}
 
 
-def get_all(endpoint, params=None):
-    items = []
-    page = 1
+def clean(value):
+    # XML 1.0 forbids most control characters.
+    return "".join(ch for ch in str(value or "") if ord(ch) >= 32 or ch in "\t\n\r")
 
+
+def get_all(session, endpoint, params=None):
+    items, page = [], 1
     while True:
-        query = dict(params or {})
-        query.update({"page": page, "limit": 50})
-
-        response = session.get(
-            f"{BASE_URL}/{endpoint}",
-            params=query,
-            timeout=30,
-        )
+        query = dict(params or {}, page=page, limit=50)
+        response = session.get(f"{BASE_URL}/{endpoint}", params=query, timeout=30)
         response.raise_for_status()
         result = response.json()
-
         batch = result.get("data", [])
         if not isinstance(batch, list):
-            raise ValueError(
-                f"Unexpected response from {endpoint}: "
-                f"{str(result)[:500]}"
-            )
-
+            raise ValueError(f"Unexpected KeyCRM response for {endpoint}")
         items.extend(batch)
-
-        meta = result.get("meta", {})
-        last_page = meta.get("last_page")
-
-        if last_page is not None:
-            if page >= int(last_page):
-                break
-        elif len(batch) < 50:
-            break
-
+        last_page = (result.get("meta") or {}).get("last_page")
+        if (last_page is not None and page >= int(last_page)) or (last_page is None and len(batch) < 50):
+            return items
         page += 1
-
-    return items
-
-
-def get_id(obj):
-    if not isinstance(obj, dict):
-        return None
-
-    for key in ("id", "category_id", "product_id", "offer_id"):
-        if obj.get(key) is not None:
-            return str(obj[key])
-
-    return None
-
-
-def find_category_id(categories, wanted_name):
-    for category in categories:
-        if not isinstance(category, dict):
-            continue
-
-        name = category.get("name") or category.get("title")
-        if isinstance(name, str) and name.strip().casefold() == wanted_name.casefold():
-            category_id = category.get("id")
-            if category_id is not None:
-                return str(category_id)
-
-    return None
 
 
 def product_category_ids(product):
-    """Extract category IDs from common product response structures."""
     found = set()
-
-    if not isinstance(product, dict):
-        return found
-
     for key in ("category_id", "categoryId"):
         if product.get(key) is not None:
             found.add(str(product[key]))
-
     category = product.get("category")
     if isinstance(category, dict):
-        category_id = category.get("id")
-        if category_id is not None:
-            found.add(str(category_id))
-    elif isinstance(category, (int, str)):
+        if category.get("id") is not None:
+            found.add(str(category["id"]))
+    elif category is not None:
         found.add(str(category))
-
-    categories = product.get("categories")
-    if isinstance(categories, list):
-        for item in categories:
-            if isinstance(item, dict) and item.get("id") is not None:
-                found.add(str(item["id"]))
-            elif isinstance(item, (int, str)):
-                found.add(str(item))
-
+    for entry in product.get("categories") or []:
+        if isinstance(entry, dict) and entry.get("id") is not None:
+            found.add(str(entry["id"]))
+        elif isinstance(entry, (str, int)):
+            found.add(str(entry))
     return found
 
 
-def get_quantity(stock):
-    quantity = float(stock.get("quantity") or 0)
-    reserve = float(stock.get("reserve") or 0)
-    return max(0, quantity - reserve)
+def as_number(value):
+    try:
+        return Decimal(str(value or 0))
+    except (InvalidOperation, ValueError):
+        raise ValueError(f"Invalid numeric value: {value!r}")
 
 
-def main():
-    categories = get_all("products/categories")
-    products = get_all("products")
-    offers = get_all("offers", {"include": "product"})
-    stocks = get_all("offers/stocks")
+def available_stock(record):
+    # Conservative: do not advertise reserved items as available.
+    return max(0, int(as_number(record.get("quantity")) - as_number(record.get("in_reserve", record.get("reserve")))))
 
-    category_id = find_category_id(categories, CATEGORY_NAME)
 
-    if category_id is None:
-        raise ValueError(
-            f"Category '{CATEGORY_NAME}' not found. "
-            f"Categories returned: {categories[:10]}"
-        )
-
-    print(f"Target category: {CATEGORY_NAME}, ID={category_id}")
-    print(f"Products: {len(products)}, offers: {len(offers)}")
-
-    products_by_id = {
-        str(product["id"]): product
-        for product in products
-        if isinstance(product, dict) and product.get("id") is not None
-    }
-
-    stock_by_offer = {}
+def stock_lookup(stocks):
+    totals = defaultdict(int)
     for stock in stocks:
         if not isinstance(stock, dict):
             continue
-
         offer_id = stock.get("offer_id")
         if offer_id is None and isinstance(stock.get("offer"), dict):
             offer_id = stock["offer"].get("id")
-
         if offer_id is not None:
-            stock_by_offer[str(offer_id)] = get_quantity(stock)
+            totals[str(offer_id)] += available_stock(stock)
+    return dict(totals)
 
-    root = ET.Element("products")
-    included = 0
-    category_matches = 0
 
+def image_urls(value):
+    if isinstance(value, str):
+        if value.startswith(("https://", "http://")):
+            yield value
+    elif isinstance(value, list):
+        for part in value:
+            yield from image_urls(part)
+    elif isinstance(value, dict):
+        for key in ("url", "image_url", "src", "original_url", "path", "link"):
+            if value.get(key):
+                yield from image_urls(value[key])
+                break
+
+
+def pictures(product, offer):
+    urls = []
+    for source, keys in ((product, ("attachments_data", "images", "photos", "picture", "image", "thumbnail_url")),
+                         (offer, ("thumbnail_url", "image_url", "image"))):
+        for key in keys:
+            for raw in image_urls(source.get(key)):
+                url = quote(raw, safe=":/?&=%#@+;,$-_.!~*'()")
+                parsed = urlsplit(url)
+                if parsed.scheme == "https" and parsed.netloc and url not in urls:
+                    urls.append(url)
+    return urls[:15]
+
+
+def render_feed(categories, products, offers, stocks):
+    category_id = next((str(c["id"]) for c in categories if
+                        str(c.get("name") or c.get("title") or "").strip().casefold() == CATEGORY_NAME.casefold()), None)
+    if category_id is None:
+        raise ValueError(f"KeyCRM category '{CATEGORY_NAME}' not found")
+
+    by_id = {str(p["id"]): p for p in products if isinstance(p, dict) and p.get("id") is not None}
+    by_stock = stock_lookup(stocks)
+    root = ET.Element("yml_catalog", {"date": datetime.now(ZoneInfo("Europe/Kyiv")).strftime("%Y-%m-%d %H:%M")})
+    shop = ET.SubElement(root, "shop")
+    ET.SubElement(shop, "name").text = VENDOR
+    ET.SubElement(shop, "currencies").append(ET.Element("currency", {"id": "UAH", "rate": "1"}))
+    groups = ET.SubElement(shop, "categories")
+    for cat_id, name in FEED_CATEGORIES.values():
+        ET.SubElement(groups, "category", {"id": cat_id}).text = name
+    listing = ET.SubElement(shop, "offers")
+    seen_ids, seen_skus = set(), set()
     for offer in offers:
-        embedded_product = offer.get("product") or {}
-        product_id = embedded_product.get("id") or offer.get("product_id")
-
-        product = products_by_id.get(
-            str(product_id), embedded_product
-        ) if product_id is not None else embedded_product
-
-        category_ids = product_category_ids(product)
-
-        if category_id not in category_ids:
+        if not isinstance(offer, dict) or offer.get("is_archived"):
             continue
-
-        category_matches += 1
-
-        name = product.get("name") or offer.get("name") or ""
-        if name.strip().casefold() == "доставка":
+        sku = str(offer.get("sku") or "").strip()
+        cfg = CATALOG.get(sku)
+        if not cfg:
             continue
-
+        parent = offer.get("product") if isinstance(offer.get("product"), dict) else {}
+        prod_id = offer.get("product_id") or parent.get("id")
+        product = by_id.get(str(prod_id), parent)
+        if product.get("is_archived") or category_id not in product_category_ids(product):
+            continue
         offer_id = offer.get("id")
-        if offer_id is None:
-            continue
+        if offer_id is None or str(offer_id) in seen_ids or sku in seen_skus:
+            raise ValueError(f"Missing/duplicate offer ID or SKU: {sku}")
+        price = as_number(offer.get("price"))
+        if price <= 0:
+            raise ValueError(f"Invalid price for {sku}")
+        urls = pictures(product, offer)
+        if not urls:
+            raise ValueError(f"No public HTTPS image URL for {sku}; do not publish incomplete feed")
+        quantity = by_stock.get(str(offer_id), available_stock(offer))
+        cat_id = FEED_CATEGORIES[cfg["category"]][0]
+        node = ET.SubElement(listing, "offer", {"id": str(offer_id), "available": str(quantity > 0).lower()})
+        fields = {"price": format(price, "f"), "stock_quantity": str(quantity),
+                  "currencyId": "UAH", "categoryId": cat_id}
+        for tag, value in fields.items():
+            ET.SubElement(node, tag).text = clean(value)
+        for url in urls:
+            ET.SubElement(node, "picture").text = url
+        for tag, value in (("vendor", VENDOR), ("article", sku),
+                           ("name_ua", cfg["name"]), ("description_ua", cfg["description"])):
+            ET.SubElement(node, tag).text = clean(value)
+        for name, value in cfg["params"].items():
+            ET.SubElement(node, "param", {"name": clean(name)}).text = clean(value)
+        seen_ids.add(str(offer_id))
+        seen_skus.add(sku)
+    if seen_skus != set(CATALOG):
+        raise ValueError(f"Catalog mismatch, missing SKUs: {sorted(set(CATALOG)-seen_skus)}")
+    ET.indent(root, space="  ")
+    return ET.ElementTree(root)
 
-        item = ET.SubElement(root, "product")
-        ET.SubElement(item, "id").text = str(offer_id)
-        ET.SubElement(item, "name").text = str(name)
-        ET.SubElement(item, "sku").text = str(offer.get("sku") or "")
-        ET.SubElement(item, "price").text = str(offer.get("price") or 0)
-        ET.SubElement(item, "quantity").text = str(
-            int(stock_by_offer.get(str(offer_id), 0))
-        )
 
-        barcode = offer.get("barcode")
-        if barcode:
-            ET.SubElement(item, "barcode").text = str(barcode)
-
-        included += 1
-
-    if category_matches == 0:
-        raise ValueError(
-            "No offers matched the target category ID. "
-            "The product category field structure needs verification. "
-            f"Example product: {products[0] if products else 'No products'}"
-        )
-
-    tree = ET.ElementTree(root)
-    ET.indent(tree, space="  ")
-    tree.write(OUTPUT, encoding="utf-8", xml_declaration=True)
-
-    print(f"XML generated: {OUTPUT}")
-    print(f"Products in category: {category_matches}")
-    print(f"Products included in feed: {included}")
+def main():
+    api_key = os.environ["KEYCRM_API_KEY"]
+    session = requests.Session()
+    session.headers.update({"Authorization": f"Bearer {api_key}", "Accept": "application/json"})
+    tree = render_feed(get_all(session, "products/categories"), get_all(session, "products"),
+                       get_all(session, "offers", {"include": "product"}), get_all(session, "offers/stocks"))
+    tmp = OUTPUT.with_suffix(".xml.tmp")
+    tree.write(tmp, encoding="utf-8", xml_declaration=True)
+    tmp.replace(OUTPUT)
+    print(f"EVA YML generated: {OUTPUT}; offers: {len(tree.getroot().findall('./shop/offers/offer'))}")
 
 
 if __name__ == "__main__":
