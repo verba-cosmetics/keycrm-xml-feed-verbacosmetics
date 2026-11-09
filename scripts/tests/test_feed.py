@@ -76,11 +76,11 @@ class FeedTests(unittest.TestCase):
         self.products[0].pop("custom_fields")
         self.products[0]["name"] = "Новий крем"
         self.products[0]["description"] = (
-            "Опис: Крем для щоденного догляду за руками.\\n"
-            "Тип засобу: Крем для рук\\n"
-            "Призначення: Догляд за шкірою\\n"
+            "Опис: Крем для щоденного догляду за руками.\n"
+            "Тип засобу: Крем для рук\n"
+            "Призначення: Догляд за шкірою\n"
             "Об'єм: 30 мл"
-        ).replace("\\\\n", "\\n")
+        )
         root = g.render_feed(self.categories, self.products, self.offers, self.stocks).getroot()
         cream = root.find("./shop/offers/offer[@id='4']")
         self.assertEqual(cream.findtext("name_ua"), "Новий крем")
