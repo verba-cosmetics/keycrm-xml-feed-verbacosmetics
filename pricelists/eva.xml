@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<yml_catalog date="2026-11-09 13:21">
+<yml_catalog date="2026-11-09 15:21">
   <shop>
     <name>Verba Cosmetics</name>
     <currencies>
@@ -18,10 +18,11 @@
         <picture>https://byverba.api.keycrm.app/file-storage/thumbnails/byverba/uploads/2026-10-30/w6wteZKPFB8V5O77p73Vo5tICfwlITCa.png</picture>
         <vendor>Verba Cosmetics</vendor>
         <article>BHCCD</article>
-        <name_ua>Крем для рук Verba Cosmetics Cashmere Dream бар'єрний</name_ua>
+        <name_ua>Barrier Hand Cream Ceshemere Dream</name_ua>
         <description_ua>Бар'єрний крем для рук Verba Cosmetics Cashmere Dream для щоденного догляду за шкірою рук.</description_ua>
         <param name="Тип засобу">Крем для рук</param>
         <param name="Призначення">Догляд за шкірою рук</param>
+        <param name="Об'єм">30 мл</param>
       </offer>
       <offer id="3" available="true">
         <price>850</price>
@@ -31,9 +32,10 @@
         <picture>https://byverba.api.keycrm.app/file-storage/thumbnails/byverba/uploads/2026-10-30/la2HD32p2lRvqIYrejBq0L6OlUxuWaaO.png</picture>
         <vendor>Verba Cosmetics</vendor>
         <article>LGC</article>
-        <name_ua>Блиск для губ Verba Cosmetics Coconut з пептидами та вітаміном C 15 мл</name_ua>
+        <name_ua>Lip Gloss Coconut з пептидами та вітаміном С</name_ua>
         <description_ua>Блиск для губ Verba Cosmetics Coconut з пептидами та вітаміном C для декоративного макіяжу губ.</description_ua>
         <param name="Тип засобу">Блиск для губ</param>
+        <param name="Призначення">Макіяж губ</param>
         <param name="Об'єм">15 мл</param>
       </offer>
       <offer id="1" available="true">
@@ -44,9 +46,10 @@
         <picture>https://byverba.api.keycrm.app/file-storage/thumbnails/byverba/uploads/2026-10-30/Uw2FtPT96i03pimM7CC5fR7yrX6kAzj4.png</picture>
         <vendor>Verba Cosmetics</vendor>
         <article>LGLECCPC</article>
-        <name_ua>Блиск для губ Verba Cosmetics Crystal Caramel з пептидами та вітаміном C 15 мл</name_ua>
+        <name_ua>Lip Gloss Crystal Caramel з пептидами та вітаміном С</name_ua>
         <description_ua>Блиск для губ Verba Cosmetics Crystal Caramel з пептидами та вітаміном C для декоративного макіяжу губ.</description_ua>
         <param name="Тип засобу">Блиск для губ</param>
+        <param name="Призначення">Макіяж губ</param>
         <param name="Об'єм">15 мл</param>
       </offer>
     </offers>
