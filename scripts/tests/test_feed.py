@@ -28,6 +28,26 @@ class FeedTests(unittest.TestCase):
             {"offer_id": 1, "quantity": 5},
         ]
 
+
+    def test_keycrm_plain_list_response(self):
+        from unittest.mock import Mock
+        response = Mock()
+        response.json.return_value = [{"uuid": "volume", "name": "Об'єм"}]
+        response.raise_for_status.return_value = None
+        session = Mock()
+        session.get.return_value = response
+        fields = g.get_all(session, "custom-fields")
+        self.assertEqual(fields, [{"uuid": "volume", "name": "Об'єм"}])
+        self.assertEqual(session.get.call_count, 1)
+
+    def test_keycrm_paginated_data_response(self):
+        from unittest.mock import Mock
+        response = Mock()
+        response.json.return_value = {"data": [{"id": 1}], "meta": {"last_page": 1}}
+        session = Mock()
+        session.get.return_value = response
+        self.assertEqual(g.get_all(session, "products"), [{"id": 1}])
+
     def test_eva_structure_and_stock(self):
         root = g.render_feed(self.categories, self.products, self.offers, self.stocks, [{"uuid": "P_VOL", "name": "Об\u0027єм"}]).getroot()
         self.assertEqual(root.tag, "yml_catalog")

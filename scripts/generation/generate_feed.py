@@ -44,9 +44,17 @@ def get_all(session, endpoint, params=None):
         response = session.get(f"{BASE_URL}/{endpoint}", params=query, timeout=30)
         response.raise_for_status()
         result = response.json()
+        if isinstance(result, list):
+            # The KeyCRM custom-fields endpoint returns a plain JSON list
+            # rather than the paginated {"data": [...], "meta": {...}} shape.
+            if page != 1:
+                raise ValueError(f"Unexpected unpaginated response on page {page} from {endpoint}")
+            return result
+        if not isinstance(result, dict):
+            raise ValueError(f"Unexpected KeyCRM response type for {endpoint}")
         batch = result.get("data", [])
         if not isinstance(batch, list):
-            raise ValueError(f"Unexpected KeyCRM response for {endpoint}")
+            raise ValueError(f"Unexpected KeyCRM data for {endpoint}")
         items.extend(batch)
         last_page = (result.get("meta") or {}).get("last_page")
         if (last_page is not None and page >= int(last_page)) or (last_page is None and len(batch) < 50):
