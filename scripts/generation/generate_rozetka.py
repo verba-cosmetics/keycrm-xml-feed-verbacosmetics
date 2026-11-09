@@ -8,8 +8,8 @@ from pathlib import Path
 import xml.etree.ElementTree as ET
 from urllib.parse import urlsplit
 
-SOURCE = Path("eva.xml")
-OUTPUT = Path("rozetka.xml")
+SOURCE = Path("pricelists/eva.xml")
+OUTPUT = Path("pricelists/rozetka.xml")
 REQUIRED_FIELDS = ("price", "currencyId", "categoryId", "picture",
                    "vendor", "stock_quantity", "name", "description")
 

@@ -19,22 +19,21 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: pip install -r scripts/config/requirements.txt
       - name: Run offline validation tests
         run: |
-          python -m unittest discover -s tests -v
-          python -m unittest test_rozetka -v
+          python -m unittest discover -s scripts/tests -v
       - name: Generate EVA XML
         env:
           KEYCRM_API_KEY: ${{ secrets.KEYCRM_API_KEY }}
-        run: python generate_feed.py
+        run: python scripts/generation/generate_feed.py
       - name: Generate Rozetka XML
-        run: python generate_rozetka.py
+        run: python scripts/generation/generate_rozetka.py
       - name: Commit updated feeds
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add eva.xml rozetka.xml
+          git add pricelists/eva.xml pricelists/rozetka.xml
           git diff --cached --quiet || (
             git commit -m "Update EVA and Rozetka XML feeds" &&
             git push
