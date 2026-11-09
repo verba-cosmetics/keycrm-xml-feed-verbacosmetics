@@ -63,11 +63,30 @@ class FeedTests(unittest.TestCase):
         self.assertEqual(root.find("./shop/offers/offer/param[@name=\"Об'єм\"]").text, "50 мл")
         ET.fromstring(ET.tostring(root, encoding="utf-8"))
 
-    def test_missing_keycrm_characteristics_prevents_publish(self):
+    def test_missing_keycrm_characteristics_keeps_product(self):
         self.products[0].pop("properties")
         self.products[0].pop("custom_fields")
-        with self.assertRaisesRegex(ValueError, "Missing public KeyCRM characteristics"):
-            g.render_feed(self.categories, self.products, self.offers, self.stocks)
+        root = g.render_feed(self.categories, self.products, self.offers, self.stocks).getroot()
+        cream = root.find("./shop/offers/offer[@id='4']")
+        self.assertIsNotNone(cream)
+        self.assertEqual(cream.findall("param"), [])
+
+    def test_product_description_is_structured_source(self):
+        self.products[0].pop("properties")
+        self.products[0].pop("custom_fields")
+        self.products[0]["name"] = "Новий крем"
+        self.products[0]["description"] = (
+            "Опис: Крем для щоденного догляду за руками.\\n"
+            "Тип засобу: Крем для рук\\n"
+            "Призначення: Догляд за шкірою\\n"
+            "Об'єм: 50 мл"
+        ).replace("\\\\n", "\\n")
+        root = g.render_feed(self.categories, self.products, self.offers, self.stocks).getroot()
+        cream = root.find("./shop/offers/offer[@id='4']")
+        self.assertEqual(cream.findtext("name_ua"), "Новий крем")
+        self.assertEqual(cream.findtext("description_ua"), "Крем для щоденного догляду за руками.")
+        self.assertEqual(cream.find("./param[@name=\"Об'єм\"]").text, "50 мл")
+        self.assertEqual(len(cream.findall("param")), 3)
 
     def test_variant_overrides_product(self):
         self.offers[0]["properties"] = [{"name": "Тип засобу", "value": "Інший крем"}]
