@@ -11,9 +11,9 @@ class FeedTests(unittest.TestCase):
     def setUp(self):
         self.categories = [{"id": 1, "name": "Продукти"}, {"id": 2, "name": "Доставка"}]
         self.products = [
-            {"id": 11, "category_id": 1, "attachments_data": ["https://example.com/cream.jpg"]},
-            {"id": 12, "category_id": 1, "thumbnail_url": "https://example.com/coconut.jpg"},
-            {"id": 13, "category_id": 1, "attachments_data": [{"url": "https://example.com/caramel.jpg"}]},
+            {"id": 11, "category_id": 1, "attachments_data": ["https://example.com/cream.jpg"], "properties": [{"name": "Тип засобу", "value": "Крем для рук"}, {"name": "Призначення", "value": "Догляд"}], "custom_fields": [{"uuid": "P_VOL", "value": "50 мл"}]},
+            {"id": 12, "category_id": 1, "thumbnail_url": "https://example.com/coconut.jpg", "properties": [{"name": "Тип засобу", "value": "Блиск"}, {"name": "Об'єм", "value": "15 мл"}]},
+            {"id": 13, "category_id": 1, "attachments_data": [{"url": "https://example.com/caramel.jpg"}], "properties": [{"name": "Тип засобу", "value": "Блиск"}, {"name": "Об'єм", "value": "15 мл"}]},
             {"id": 14, "category_id": 2},
         ]
         self.offers = [
@@ -29,7 +29,7 @@ class FeedTests(unittest.TestCase):
         ]
 
     def test_eva_structure_and_stock(self):
-        root = g.render_feed(self.categories, self.products, self.offers, self.stocks).getroot()
+        root = g.render_feed(self.categories, self.products, self.offers, self.stocks, [{"uuid": "P_VOL", "name": "Об\u0027єм"}]).getroot()
         self.assertEqual(root.tag, "yml_catalog")
         nodes = root.findall("./shop/offers/offer")
         self.assertEqual([n.attrib["id"] for n in nodes], ["4", "3", "1"])
@@ -40,7 +40,20 @@ class FeedTests(unittest.TestCase):
                 self.assertIsNotNone(node.find(field))
             self.assertGreaterEqual(len(node.findall("param")), 2)
             self.assertGreaterEqual(len(node.findtext("description_ua")), 30)
+        self.assertEqual(root.find("./shop/offers/offer/param[@name=\"Об'єм\"]").text, "50 мл")
         ET.fromstring(ET.tostring(root, encoding="utf-8"))
+
+    def test_missing_keycrm_characteristics_prevents_publish(self):
+        self.products[0].pop("properties")
+        self.products[0].pop("custom_fields")
+        with self.assertRaisesRegex(ValueError, "Missing public KeyCRM characteristics"):
+            g.render_feed(self.categories, self.products, self.offers, self.stocks)
+
+    def test_variant_overrides_product(self):
+        self.offers[0]["properties"] = [{"name": "Тип засобу", "value": "Інший крем"}]
+        root = g.render_feed(self.categories, self.products, self.offers, self.stocks,
+                             [{"uuid": "P_VOL", "name": "Об'єм"}]).getroot()
+        self.assertEqual(root.find("./shop/offers/offer/param[@name='Тип засобу']").text, "Інший крем")
 
     def test_missing_images_prevent_publish(self):
         self.products[0].pop("attachments_data")
