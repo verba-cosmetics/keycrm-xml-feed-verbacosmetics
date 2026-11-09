@@ -3,7 +3,7 @@
 Template (one field per line):
 Опис: Customer-facing product description.
 Тип засобу: Крем для рук
-Об'єм: 15 мл
+Об'єм: 30 мл
 
 Descriptions without the template remain ordinary editorial descriptions.
 Never infer net contents from the shipping weight/dimensions.
