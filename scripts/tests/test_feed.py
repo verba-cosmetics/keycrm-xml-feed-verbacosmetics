@@ -63,11 +63,14 @@ class FeedTests(unittest.TestCase):
         self.assertEqual(root.find("./shop/offers/offer/param[@name=\"Об'єм\"]").text, "50 мл")
         ET.fromstring(ET.tostring(root, encoding="utf-8"))
 
-    def test_missing_keycrm_characteristics_prevents_publish(self):
+    def test_missing_keycrm_characteristics_keeps_product_without_params(self):
         self.products[0].pop("properties")
         self.products[0].pop("custom_fields")
-        with self.assertRaisesRegex(ValueError, "Missing public KeyCRM characteristics"):
-            g.render_feed(self.categories, self.products, self.offers, self.stocks)
+        root = g.render_feed(self.categories, self.products, self.offers, self.stocks).getroot()
+        cream = root.find("./shop/offers/offer[@id='4']")
+        self.assertIsNotNone(cream)
+        self.assertEqual(cream.findall("param"), [])
+        self.assertEqual(cream.findtext("stock_quantity"), "8")
 
     def test_variant_overrides_product(self):
         self.offers[0]["properties"] = [{"name": "Тип засобу", "value": "Інший крем"}]
