@@ -56,8 +56,7 @@ def convert(root):
             raise ValueError(f"Invalid stock/price for offer {offer_id}")
         if offer.get("available") != str(stock > 0).lower():
             raise ValueError(f"Availability mismatch for offer {offer_id}")
-        if not offer.findall("param"):
-            raise ValueError(f"No product characteristics for offer {offer_id}")
+        # Only export characteristics actually present in KeyCRM.
         for image in offer.findall("picture"):
             address = (image.text or "").strip()
             parsed = urlsplit(address)
