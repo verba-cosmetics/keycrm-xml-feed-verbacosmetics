@@ -10,6 +10,7 @@ from urllib.parse import quote, urlsplit
 from zoneinfo import ZoneInfo
 
 import requests
+from dynamic_attributes import custom_field_names, product_parameters
 
 BASE_URL = "https://openapi.keycrm.app/v1"
 OUTPUT = Path("pricelists/eva.xml")
@@ -22,27 +23,12 @@ FEED_CATEGORIES = {
     "gloss": ("102", "Блиски для губ"),
 }
 
-# Whitelist SKU: other KeyCRM products (including delivery) are never exported.
-# Ukrainian copy below should be approved before publishing to EVA.
+# SKU selection and marketplace category IDs are the only product mappings kept
+# in code. No product characteristic, volume or material is hard-coded here.
 CATALOG = {
-    "BHCCD": {
-        "category": "cream",
-        "name": "Крем для рук Verba Cosmetics Cashmere Dream бар'єрний",
-        "description": "Бар'єрний крем для рук Verba Cosmetics Cashmere Dream для щоденного догляду за шкірою рук.",
-        "params": {"Тип засобу": "Крем для рук", "Призначення": "Догляд за шкірою рук"},
-    },
-    "LGC": {
-        "category": "gloss",
-        "name": "Блиск для губ Verba Cosmetics Coconut з пептидами та вітаміном C 15 мл",
-        "description": "Блиск для губ Verba Cosmetics Coconut з пептидами та вітаміном C для декоративного макіяжу губ.",
-        "params": {"Тип засобу": "Блиск для губ", "Об'єм": "15 мл"},
-    },
-    "LGLECCPC": {
-        "category": "gloss",
-        "name": "Блиск для губ Verba Cosmetics Crystal Caramel з пептидами та вітаміном C 15 мл",
-        "description": "Блиск для губ Verba Cosmetics Crystal Caramel з пептидами та вітаміном C для декоративного макіяжу губ.",
-        "params": {"Тип засобу": "Блиск для губ", "Об'єм": "15 мл"},
-    },
+    "BHCCD": {"category": "cream", "name": "Крем для рук Verba Cosmetics Cashmere Dream бар'єрний", "description": "Бар'єрний крем для рук Verba Cosmetics Cashmere Dream для щоденного догляду за шкірою рук."},
+    "LGC": {"category": "gloss", "name": "Блиск для губ Verba Cosmetics Coconut з пептидами та вітаміном C 15 мл", "description": "Блиск для губ Verba Cosmetics Coconut з пептидами та вітаміном C для декоративного макіяжу губ."},
+    "LGLECCPC": {"category": "gloss", "name": "Блиск для губ Verba Cosmetics Crystal Caramel з пептидами та вітаміном C 15 мл", "description": "Блиск для губ Verba Cosmetics Crystal Caramel з пептидами та вітаміном C для декоративного макіяжу губ."},
 }
 
 
@@ -139,7 +125,7 @@ def pictures(product, offer):
     return urls[:15]
 
 
-def render_feed(categories, products, offers, stocks):
+def render_feed(categories, products, offers, stocks, custom_fields=None):
     category_id = next((str(c["id"]) for c in categories if
                         str(c.get("name") or c.get("title") or "").strip().casefold() == CATEGORY_NAME.casefold()), None)
     if category_id is None:
@@ -147,6 +133,7 @@ def render_feed(categories, products, offers, stocks):
 
     by_id = {str(p["id"]): p for p in products if isinstance(p, dict) and p.get("id") is not None}
     by_stock = stock_lookup(stocks)
+    field_names = custom_field_names(custom_fields or [])
     root = ET.Element("yml_catalog", {"date": datetime.now(ZoneInfo("Europe/Kyiv")).strftime("%Y-%m-%d %H:%M")})
     shop = ET.SubElement(root, "shop")
     ET.SubElement(shop, "name").text = VENDOR
@@ -178,6 +165,13 @@ def render_feed(categories, products, offers, stocks):
         if not urls:
             raise ValueError(f"No public HTTPS image URL for {sku}; do not publish incomplete feed")
         quantity = by_stock.get(str(offer_id), available_stock(offer))
+        params = product_parameters(product, offer, field_names)
+        if len(params) < 2:
+            raise ValueError(
+                f"Missing public KeyCRM characteristics for SKU {sku}: "
+                f"found {len(params)}. Add product properties/custom fields "
+                f"(including 'Об'єм' with units when appropriate) in KeyCRM."
+            )
         cat_id = FEED_CATEGORIES[cfg["category"]][0]
         node = ET.SubElement(listing, "offer", {"id": str(offer_id), "available": str(quantity > 0).lower()})
         fields = {"price": format(price, "f"), "stock_quantity": str(quantity),
@@ -189,7 +183,7 @@ def render_feed(categories, products, offers, stocks):
         for tag, value in (("vendor", VENDOR), ("article", sku),
                            ("name_ua", cfg["name"]), ("description_ua", cfg["description"])):
             ET.SubElement(node, tag).text = clean(value)
-        for name, value in cfg["params"].items():
+        for name, value in params.items():
             ET.SubElement(node, "param", {"name": clean(name)}).text = clean(value)
         seen_ids.add(str(offer_id))
         seen_skus.add(sku)
@@ -203,8 +197,13 @@ def main():
     api_key = os.environ["KEYCRM_API_KEY"]
     session = requests.Session()
     session.headers.update({"Authorization": f"Bearer {api_key}", "Accept": "application/json"})
-    tree = render_feed(get_all(session, "products/categories"), get_all(session, "products"),
-                       get_all(session, "offers", {"include": "product"}), get_all(session, "offers/stocks"))
+    tree = render_feed(
+        get_all(session, "products/categories"),
+        get_all(session, "products", {"include": "custom_fields"}),
+        get_all(session, "offers", {"include": "product"}),
+        get_all(session, "offers/stocks"),
+        get_all(session, "custom-fields", {"include": "options"}),
+    )
     tmp = OUTPUT.with_suffix(".xml.tmp")
     tree.write(tmp, encoding="utf-8", xml_declaration=True)
     tmp.replace(OUTPUT)
