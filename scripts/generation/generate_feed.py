@@ -11,6 +11,7 @@ from zoneinfo import ZoneInfo
 
 import requests
 from dynamic_attributes import custom_field_names, product_parameters
+from description_fields import parse_description
 
 BASE_URL = "https://openapi.keycrm.app/v1"
 OUTPUT = Path("pricelists/eva.xml")
@@ -174,25 +175,16 @@ def render_feed(categories, products, offers, stocks, custom_fields=None):
             raise ValueError(f"No public HTTPS image URL for {sku}; do not publish incomplete feed")
         quantity = by_stock.get(str(offer_id), available_stock(offer))
         params = product_parameters(product, offer, field_names)
-        if len(params) < 2:
-            # Log only structural metadata, never product field values, API keys,
-            # costs, customer data or internal custom-field contents.
-            def shape(entity):
-                return {
-                    "properties_count": len(entity.get("properties") or []),
-                    "attributes_count": len(entity.get("attributes") or []),
-                    "custom_fields_count": len(entity.get("custom_fields") or []),
-                    "has_description": bool(entity.get("description")),
-                    "has_weight": entity.get("weight") is not None,
-                    "has_dimensions": any(entity.get(k) is not None for k in ("length", "width", "height")),
-                }
-            print(f"KeyCRM attribute diagnostic for {sku}: product={shape(product)}, offer={shape(offer)}, "
-                  f"field_definitions={len(field_names)}, parsed_public_params={len(params)}")
-            raise ValueError(
-                f"Missing public KeyCRM characteristics for SKU {sku}: "
-                f"found {len(params)}; need at least 2. Add product properties/custom fields "
-                f"in KeyCRM or verify that the API exposes them. Shipping weight is NOT product volume."
-            )
+        # The KeyCRM Description field can contain an editorial description
+        # followed by free-form key: value lines (e.g. "Об'єм: 15 мл").
+        # Explicit description attributes override the same attribute from
+        # other KeyCRM fields; no values are invented by the generator.
+        description, description_params = parse_description(product.get("description") or "")
+        params.update(description_params)
+        if not params:
+            print(f"Warning: SKU {sku} has no marketplace characteristics in KeyCRM")
+        product_name = str(product.get("name") or cfg["name"]).strip()
+        product_description = description or cfg["description"]
         cat_id = FEED_CATEGORIES[cfg["category"]][0]
         node = ET.SubElement(listing, "offer", {"id": str(offer_id), "available": str(quantity > 0).lower()})
         fields = {"price": format(price, "f"), "stock_quantity": str(quantity),
@@ -202,7 +194,7 @@ def render_feed(categories, products, offers, stocks, custom_fields=None):
         for url in urls:
             ET.SubElement(node, "picture").text = url
         for tag, value in (("vendor", VENDOR), ("article", sku),
-                           ("name_ua", cfg["name"]), ("description_ua", cfg["description"])):
+                           ("name_ua", product_name), ("description_ua", product_description)):
             ET.SubElement(node, tag).text = clean(value)
         for name, value in params.items():
             ET.SubElement(node, "param", {"name": clean(name)}).text = clean(value)
