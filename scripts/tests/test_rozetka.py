@@ -35,6 +35,14 @@ class RozetkaTests(unittest.TestCase):
             self.assertEqual(offer.findtext("description"), offer.findtext("description_ua"))
         self.assertIsNone(source.find("./shop/offers/offer/name"))
 
+    def test_products_without_params_are_kept(self):
+        root = ET.fromstring(SOURCE)
+        for offer in root.findall("./shop/offers/offer"):
+            for param in offer.findall("param"):
+                offer.remove(param)
+        converted = convert(root).getroot()
+        self.assertEqual(len(converted.findall("./shop/offers/offer")), 3)
+
     def test_bad_image_rejected(self):
         root = ET.fromstring(SOURCE)
         root.find("./shop/offers/offer/picture").text = "https://example.com/a+b.png"
