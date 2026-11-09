@@ -79,13 +79,13 @@ class FeedTests(unittest.TestCase):
             "Опис: Крем для щоденного догляду за руками.\\n"
             "Тип засобу: Крем для рук\\n"
             "Призначення: Догляд за шкірою\\n"
-            "Об'єм: 50 мл"
+            "Об'єм: 30 мл"
         ).replace("\\\\n", "\\n")
         root = g.render_feed(self.categories, self.products, self.offers, self.stocks).getroot()
         cream = root.find("./shop/offers/offer[@id='4']")
         self.assertEqual(cream.findtext("name_ua"), "Новий крем")
         self.assertEqual(cream.findtext("description_ua"), "Крем для щоденного догляду за руками.")
-        self.assertEqual(cream.find("./param[@name=\"Об'єм\"]").text, "50 мл")
+        self.assertEqual(cream.find("./param[@name=\"Об'єм\"]").text, "30 мл")
         self.assertEqual(len(cream.findall("param")), 3)
 
     def test_variant_overrides_product(self):
