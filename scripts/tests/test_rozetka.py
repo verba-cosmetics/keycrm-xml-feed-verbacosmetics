@@ -35,6 +35,15 @@ class RozetkaTests(unittest.TestCase):
             self.assertEqual(offer.findtext("description"), offer.findtext("description_ua"))
         self.assertIsNone(source.find("./shop/offers/offer/name"))
 
+    def test_missing_optional_characteristics(self):
+        root = ET.fromstring(SOURCE)
+        for offer in root.findall("./shop/offers/offer"):
+            for param in offer.findall("param"):
+                offer.remove(param)
+        result = convert(root).getroot()
+        self.assertEqual(len(result.findall("./shop/offers/offer")), 3)
+        self.assertFalse(result.findall("./shop/offers/offer/param"))
+
     def test_bad_image_rejected(self):
         root = ET.fromstring(SOURCE)
         root.find("./shop/offers/offer/picture").text = "https://example.com/a+b.png"
