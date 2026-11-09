@@ -175,10 +175,23 @@ def render_feed(categories, products, offers, stocks, custom_fields=None):
         quantity = by_stock.get(str(offer_id), available_stock(offer))
         params = product_parameters(product, offer, field_names)
         if len(params) < 2:
+            # Log only structural metadata, never product field values, API keys,
+            # costs, customer data or internal custom-field contents.
+            def shape(entity):
+                return {
+                    "properties_count": len(entity.get("properties") or []),
+                    "attributes_count": len(entity.get("attributes") or []),
+                    "custom_fields_count": len(entity.get("custom_fields") or []),
+                    "has_description": bool(entity.get("description")),
+                    "has_weight": entity.get("weight") is not None,
+                    "has_dimensions": any(entity.get(k) is not None for k in ("length", "width", "height")),
+                }
+            print(f"KeyCRM attribute diagnostic for {sku}: product={shape(product)}, offer={shape(offer)}, "
+                  f"field_definitions={len(field_names)}, parsed_public_params={len(params)}")
             raise ValueError(
                 f"Missing public KeyCRM characteristics for SKU {sku}: "
-                f"found {len(params)}. Add product properties/custom fields "
-                f"(including 'Об'єм' with units when appropriate) in KeyCRM."
+                f"found {len(params)}; need at least 2. Add product properties/custom fields "
+                f"in KeyCRM or verify that the API exposes them. Shipping weight is NOT product volume."
             )
         cat_id = FEED_CATEGORIES[cfg["category"]][0]
         node = ET.SubElement(listing, "offer", {"id": str(offer_id), "available": str(quantity > 0).lower()})
