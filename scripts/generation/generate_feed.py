@@ -12,7 +12,7 @@ from zoneinfo import ZoneInfo
 import requests
 
 BASE_URL = "https://openapi.keycrm.app/v1"
-OUTPUT = Path("eva.xml")
+OUTPUT = Path("pricelists/eva.xml")
 CATEGORY_NAME = "Продукти"
 VENDOR = "Verba Cosmetics"
 
