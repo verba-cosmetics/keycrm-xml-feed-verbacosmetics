@@ -34,7 +34,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add products.xml rozetka.xml
+          git add eva.xml rozetka.xml
           git diff --cached --quiet || (
             git commit -m "Update EVA and Rozetka XML feeds" &&
             git push
