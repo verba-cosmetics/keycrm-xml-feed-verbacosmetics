@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<yml_catalog date="2026-11-13 08:56">
+<yml_catalog date="2026-11-13 17:08">
   <shop>
     <name>Verba Cosmetics</name>
     <currencies>
@@ -18,12 +18,12 @@
         <picture>https://byverba.api.keycrm.app/file-storage/thumbnails/byverba/uploads/2026-10-30/w6wteZKPFB8V5O77p73Vo5tICfwlITCa.png</picture>
         <vendor>Verba Cosmetics</vendor>
         <article>BHCCD</article>
-        <name_ua>Barrier Hand Cream Ceshemere Dream</name_ua>
+        <name_ua>Barrier Hand Cream Cashmere Dream</name_ua>
         <description_ua>Бар'єрний крем для рук Verba Cosmetics Cashmere Dream для щоденного догляду за шкірою рук.</description_ua>
         <param name="Тип засобу">Крем для рук</param>
         <param name="Призначення">Догляд за шкірою рук</param>
         <param name="Об'єм">30 мл</param>
-        <name>Barrier Hand Cream Ceshemere Dream</name>
+        <name>Barrier Hand Cream Cashmere Dream</name>
         <description>Бар'єрний крем для рук Verba Cosmetics Cashmere Dream для щоденного догляду за шкірою рук.</description>
       </offer>
       <offer id="3" available="true">
