@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<yml_catalog date="2026-11-16 20:52">
+<yml_catalog date="2026-11-17 04:17">
   <shop>
     <name>Verba Cosmetics</name>
     <currencies>
@@ -12,7 +12,7 @@
     <offers>
       <offer id="4" available="true">
         <price>490</price>
-        <stock_quantity>3668</stock_quantity>
+        <stock_quantity>3254</stock_quantity>
         <currencyId>UAH</currencyId>
         <categoryId>101</categoryId>
         <picture>https://byverba.api.keycrm.app/file-storage/thumbnails/byverba/uploads/2026-11-16/Saxvf46izetHqZM9vZNeHOR0vMEt26Ax.png</picture>
@@ -29,7 +29,7 @@
       </offer>
       <offer id="3" available="true">
         <price>850</price>
-        <stock_quantity>9510</stock_quantity>
+        <stock_quantity>9520</stock_quantity>
         <currencyId>UAH</currencyId>
         <categoryId>102</categoryId>
         <picture>https://byverba.api.keycrm.app/file-storage/thumbnails/byverba/uploads/2026-10-30/la2HD32p2lRvqIYrejBq0L6OlUxuWaaO.png</picture>
@@ -41,9 +41,9 @@
         <param name="Призначення">Макіяж губ</param>
         <param name="Об'єм">15 мл</param>
       </offer>
-      <offer id="1" available="true">
+      <offer id="1" available="false">
         <price>850</price>
-        <stock_quantity>492</stock_quantity>
+        <stock_quantity>0</stock_quantity>
         <currencyId>UAH</currencyId>
         <categoryId>102</categoryId>
         <picture>https://byverba.api.keycrm.app/file-storage/thumbnails/byverba/uploads/2026-10-30/Uw2FtPT96i03pimM7CC5fR7yrX6kAzj4.png</picture>
