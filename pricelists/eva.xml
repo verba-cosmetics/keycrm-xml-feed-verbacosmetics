@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<yml_catalog date="2026-11-18 11:42">
+<yml_catalog date="2026-11-18 20:25">
   <shop>
     <name>Verba Cosmetics</name>
     <currencies>
@@ -12,7 +12,7 @@
     <offers>
       <offer id="4" available="true">
         <price>490</price>
-        <stock_quantity>2471</stock_quantity>
+        <stock_quantity>2293</stock_quantity>
         <currencyId>UAH</currencyId>
         <categoryId>101</categoryId>
         <picture>https://byverba.api.keycrm.app/file-storage/thumbnails/byverba/uploads/2026-11-16/Saxvf46izetHqZM9vZNeHOR0vMEt26Ax.png</picture>
@@ -21,7 +21,7 @@
         <picture>https://byverba.api.keycrm.app/file-storage/thumbnails/byverba/uploads/2026-11-16/9cg4YZEyofUarjkjkwqpHAvmzK9cT60P.png</picture>
         <vendor>Verba Cosmetics</vendor>
         <article>BHCCD</article>
-        <name_ua>Barrier Hand Cream Cashmere Dream</name_ua>
+        <name_ua>Крем для рук Cashmere Dream</name_ua>
         <description_ua>Бар'єрний крем для рук Verba Cosmetics Cashmere Dream для щоденного догляду за шкірою рук.</description_ua>
         <param name="Тип засобу">Крем для рук</param>
         <param name="Призначення">Догляд за шкірою рук</param>
@@ -35,7 +35,7 @@
         <picture>https://byverba.api.keycrm.app/file-storage/thumbnails/byverba/uploads/2026-10-30/la2HD32p2lRvqIYrejBq0L6OlUxuWaaO.png</picture>
         <vendor>Verba Cosmetics</vendor>
         <article>LGC</article>
-        <name_ua>Lip Gloss Coconut з пептидами та вітаміном С</name_ua>
+        <name_ua>Блиск для губ Coconut Paradise з пептидами та вітаміном С</name_ua>
         <description_ua>Блиск для губ Verba Cosmetics Coconut з пептидами та вітаміном C для декоративного макіяжу губ.</description_ua>
         <param name="Тип засобу">Блиск для губ</param>
         <param name="Призначення">Макіяж губ</param>
@@ -43,13 +43,13 @@
       </offer>
       <offer id="1" available="true">
         <price>850</price>
-        <stock_quantity>9397</stock_quantity>
+        <stock_quantity>9394</stock_quantity>
         <currencyId>UAH</currencyId>
         <categoryId>102</categoryId>
         <picture>https://byverba.api.keycrm.app/file-storage/thumbnails/byverba/uploads/2026-10-30/Uw2FtPT96i03pimM7CC5fR7yrX6kAzj4.png</picture>
         <vendor>Verba Cosmetics</vendor>
         <article>LGLECCPC</article>
-        <name_ua>Lip Gloss Crystal Caramel з пептидами та вітаміном С</name_ua>
+        <name_ua>Блиск для губ Caramel з пептидами та вітаміном С</name_ua>
         <description_ua>Блиск для губ Verba Cosmetics Crystal Caramel з пептидами та вітаміном C для декоративного макіяжу губ.</description_ua>
         <param name="Тип засобу">Блиск для губ</param>
         <param name="Призначення">Макіяж губ</param>
