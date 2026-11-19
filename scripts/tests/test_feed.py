@@ -16,6 +16,10 @@ class FeedTests(unittest.TestCase):
             {"id": 13, "category_id": 1, "attachments_data": [{"url": "https://example.com/caramel.jpg"}], "properties": [{"name": "Тип засобу", "value": "Блиск"}, {"name": "Об'єм", "value": "15 мл"}]},
             {"id": 14, "category_id": 2},
         ]
+        for item, kind, volume in zip(self.products[:3], ("Крем для рук", "Блиск для губ", "Блиск для губ"), (30, 15, 15)):
+            item["custom_fields"] = [{"uuid": "CT_1014", "value": True},
+                                     {"uuid": "CT_1015", "value": [kind]},
+                                     {"uuid": "CT_1016", "value": volume}]
         self.offers = [
             {"id": 4, "product_id": 11, "sku": "BHCCD", "price": 490},
             {"id": 3, "product_id": 12, "sku": "LGC", "price": 850},
@@ -60,7 +64,7 @@ class FeedTests(unittest.TestCase):
                 self.assertIsNotNone(node.find(field))
             self.assertGreaterEqual(len(node.findall("param")), 2)
             self.assertGreaterEqual(len(node.findtext("description_ua")), 30)
-        self.assertEqual(root.find("./shop/offers/offer/param[@name=\"Об'єм\"]").text, "50 мл")
+        self.assertEqual(root.find("./shop/offers/offer/param[@name=\"Об'єм\"]").text, "30 мл")
         ET.fromstring(ET.tostring(root, encoding="utf-8"))
 
     def test_missing_keycrm_characteristics_keeps_product(self):
@@ -71,28 +75,39 @@ class FeedTests(unittest.TestCase):
         self.assertIsNotNone(cream)
         self.assertEqual(cream.findall("param"), [])
 
-    def test_product_description_is_structured_source(self):
-        self.products[0].pop("properties")
-        self.products[0].pop("custom_fields")
-        self.products[0]["name"] = "Новий крем"
-        self.products[0]["description"] = (
-            "Опис: Крем для щоденного догляду за руками.\n"
-            "Тип засобу: Крем для рук\n"
-            "Призначення: Догляд за шкірою\n"
-            "Об'єм: 30 мл"
-        )
-        root = g.render_feed(self.categories, self.products, self.offers, self.stocks).getroot()
-        cream = root.find("./shop/offers/offer[@id='4']")
-        self.assertEqual(cream.findtext("name_ua"), "Новий крем")
-        self.assertEqual(cream.findtext("description_ua"), "Крем для щоденного догляду за руками.")
-        self.assertEqual(cream.find("./param[@name=\"Об'єм\"]").text, "30 мл")
-        self.assertEqual(len(cream.findall("param")), 3)
-
-    def test_variant_overrides_product(self):
-        self.offers[0]["properties"] = [{"name": "Тип засобу", "value": "Інший крем"}]
+    def test_direct_fields_and_plain_description(self):
+        self.products[0]["description"] = "Крем для рук.\n**Переваги продукту**\n- Зволоження\nСклад: Aqua"
+        self.products[0]["custom_fields"].append({"uuid": "TEST_ACTIVE", "value": ["Гліцерин", "Алантоїн"]})
         root = g.render_feed(self.categories, self.products, self.offers, self.stocks,
-                             [{"uuid": "P_VOL", "name": "Об'єм"}]).getroot()
-        self.assertEqual(root.find("./shop/offers/offer/param[@name='Тип засобу']").text, "Інший крем")
+                             [{"uuid": "TEST_ACTIVE", "name": "Активний компонент"}]).getroot()
+        cream = root.find("./shop/offers/offer[@id='4']")
+        self.assertEqual(cream.findtext("description_ua"), self.products[0]["description"])
+        self.assertEqual(cream.find("./param[@name='Вид']").text, "Крем для рук")
+        self.assertEqual(cream.find("./param[@name='Активний компонент']").text, "Гліцерин, Алантоїн")
+        self.assertIsNone(cream.find("./param[@name='Склад']"))
+
+    def test_disabled_marketplace_and_missing_toggle(self):
+        for value in (False, 0, "false", None):
+            self.products[0]["custom_fields"][0]["value"] = value
+            root = g.render_feed(self.categories, self.products, self.offers, self.stocks).getroot()
+            cream = root.find("./shop/offers/offer[@id='4']")
+            self.assertEqual(cream.get("available"), "false")
+            self.assertEqual(cream.findtext("stock_quantity"), "0")
+
+    def test_eva_html_and_rozetka_plain(self):
+        from tempfile import TemporaryDirectory
+        from generate_rozetka import convert
+        self.products[0]["description"] = "Крем & догляд.\n**Переваги продукту**\n- М'якість"
+        tree = g.render_feed(self.categories, self.products, self.offers, self.stocks)
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "eva.xml"
+            g.write_eva_xml(tree, path)
+            self.assertIn("<![CDATA[", path.read_text(encoding="utf-8"))
+            eva = ET.parse(path).getroot()
+            self.assertIn("<strong>Переваги продукту</strong>", eva.findtext("./shop/offers/offer/description_ua"))
+            rz = convert(eva).getroot()
+            self.assertIn("Крем & догляд.", rz.findtext("./shop/offers/offer/description_ua"))
+            self.assertNotIn("<p>", rz.findtext("./shop/offers/offer/description_ua"))
 
     def test_missing_images_prevent_publish(self):
         self.products[0].pop("attachments_data")
