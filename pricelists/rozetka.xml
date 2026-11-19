@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<yml_catalog date="2026-11-19 09:56">
+<yml_catalog date="2026-11-19 18:21">
   <shop>
     <name>Verba Cosmetics</name>
     <currencies>
@@ -12,7 +12,7 @@
     <offers>
       <offer id="4" available="true">
         <price>490</price>
-        <stock_quantity>2186</stock_quantity>
+        <stock_quantity>2111</stock_quantity>
         <currencyId>UAH</currencyId>
         <categoryId>101</categoryId>
         <picture>https://byverba.api.keycrm.app/file-storage/thumbnails/byverba/uploads/2026-11-16/Saxvf46izetHqZM9vZNeHOR0vMEt26Ax.png</picture>
@@ -21,45 +21,90 @@
         <picture>https://byverba.api.keycrm.app/file-storage/thumbnails/byverba/uploads/2026-11-16/9cg4YZEyofUarjkjkwqpHAvmzK9cT60P.png</picture>
         <vendor>Verba Cosmetics</vendor>
         <article>BHCCD</article>
-        <name_ua>Крем для рук Cashmere Dream Verba Cosmetics 30мл</name_ua>
-        <description_ua>Бар'єрний крем для рук Verba Cosmetics Cashmere Dream для щоденного догляду за шкірою рук.</description_ua>
-        <param name="Тип засобу">Крем для рук</param>
-        <param name="Призначення">Догляд за шкірою рук</param>
+        <name_ua>Крем для рук Verba Cosmetics Cashmere Dream 30мл</name_ua>
+        <description_ua>Verba Cosmetics Cashmere Dream — парфумований бар'єрний крем для рук із косметичної лінійки Юлії Верби, у якій сучасна естетика поєднується з турботою про себе.
+Cashmere Dream огортає шкіру ніжним ароматом мускусу та кашеміру, перетворюючи повсякденний догляд на особливий б'юті-ритуал. Формула з лецитином і 4D-гіалуроновою кислотою інтенсивно зволожує, живить та допомагає підтримувати природний захисний бар'єр шкіри рук.
+Переваги продукту
+• 4D-гіалуронова кислота — комплекс із чотирьох форм гіалуронової кислоти для зволоження шкіри.
+• Гідрогенізований лецитин допомагає підтримувати природний захисний бар'єр.
+• Гліцерин та гідроксиетилсечовина сприяють утриманню вологи.
+• Алантоїн допомагає пом'якшити та заспокоїти шкіру.
+• Комплекс доглядових компонентів дарує відчуття гладкості, ніжності та комфорту.
+• Парфумована композиція доповнює догляд витонченим ароматом.
+• Компактний формат 30 мл зручно завжди мати із собою.
+Ароматична композиція
+Теплий мускус, ніжні квіткові акценти, чуттєві деревні та гурманські ноти створюють багатогранний аромат, що асоціюється з м'якістю кашеміру.
+Ноти аромату: ваніль, амбра, кедр, пачулі, троянда, сандал, мускус, кокос та жасмин.
+Б'юті-поради
+Доповніть свій щоденний ритуал догляду кремом Cashmere Dream. Використовуйте його після миття рук, а перед сном приділяйте особливу увагу сухим ділянкам шкіри та кутикулі.
+Склад товару
+Aqua, Isopropyl Palmitate, Cetyl Palmitate, Cetearyl Alcohol, Glycerin, Glyceryl Stearate, Dimethicone, Bis-Diglyceryl Polyacyladipate-2, Diisostearyl Malate, Hydrogenated Lecithin, C12-16 Alcohols, Palmitic Acid, Parfum, Sodium Polyacrylate, Hydroxyethyl Urea, Acetamidoethoxyethanol, Triethyl Citrate, Allantoin, Sodium Hyaluronate Crosspolymer, Sodium Hyaluronate, Sodium Acetylated Hyaluronate, Hydrolyzed Hyaluronic Acid, Pentylene Glycol, Ceteareth-20, Ceteareth-12, Pentaerythrityl Tetra-Di-t-Butyl Hydroxyhydrocinnamate, Phenoxyethanol, Ethylhexylglycerin, Acetyl Cedrene, Tetramethyl acetyloctahydronaphthalenes, Hexyl cinnamal, Linalyl Acetate, Linalool.
+Як використовувати
+Нанесіть невелику кількість крему на чисту шкіру рук і розподіліть легкими масажними рухами до поглинання. Використовуйте протягом дня за потреби.</description_ua>
+        <param name="Вид">Крем для рук</param>
         <param name="Об'єм">30 мл</param>
-        <name>Крем для рук Cashmere Dream Verba Cosmetics 30мл</name>
-        <description>Бар'єрний крем для рук Verba Cosmetics Cashmere Dream для щоденного догляду за шкірою рук.</description>
+        <name>Крем для рук Verba Cosmetics Cashmere Dream 30мл</name>
+        <description>Verba Cosmetics Cashmere Dream — парфумований бар'єрний крем для рук із косметичної лінійки Юлії Верби, у якій сучасна естетика поєднується з турботою про себе.
+Cashmere Dream огортає шкіру ніжним ароматом мускусу та кашеміру, перетворюючи повсякденний догляд на особливий б'юті-ритуал. Формула з лецитином і 4D-гіалуроновою кислотою інтенсивно зволожує, живить та допомагає підтримувати природний захисний бар'єр шкіри рук.
+Переваги продукту
+• 4D-гіалуронова кислота — комплекс із чотирьох форм гіалуронової кислоти для зволоження шкіри.
+• Гідрогенізований лецитин допомагає підтримувати природний захисний бар'єр.
+• Гліцерин та гідроксиетилсечовина сприяють утриманню вологи.
+• Алантоїн допомагає пом'якшити та заспокоїти шкіру.
+• Комплекс доглядових компонентів дарує відчуття гладкості, ніжності та комфорту.
+• Парфумована композиція доповнює догляд витонченим ароматом.
+• Компактний формат 30 мл зручно завжди мати із собою.
+Ароматична композиція
+Теплий мускус, ніжні квіткові акценти, чуттєві деревні та гурманські ноти створюють багатогранний аромат, що асоціюється з м'якістю кашеміру.
+Ноти аромату: ваніль, амбра, кедр, пачулі, троянда, сандал, мускус, кокос та жасмин.
+Б'юті-поради
+Доповніть свій щоденний ритуал догляду кремом Cashmere Dream. Використовуйте його після миття рук, а перед сном приділяйте особливу увагу сухим ділянкам шкіри та кутикулі.
+Склад товару
+Aqua, Isopropyl Palmitate, Cetyl Palmitate, Cetearyl Alcohol, Glycerin, Glyceryl Stearate, Dimethicone, Bis-Diglyceryl Polyacyladipate-2, Diisostearyl Malate, Hydrogenated Lecithin, C12-16 Alcohols, Palmitic Acid, Parfum, Sodium Polyacrylate, Hydroxyethyl Urea, Acetamidoethoxyethanol, Triethyl Citrate, Allantoin, Sodium Hyaluronate Crosspolymer, Sodium Hyaluronate, Sodium Acetylated Hyaluronate, Hydrolyzed Hyaluronic Acid, Pentylene Glycol, Ceteareth-20, Ceteareth-12, Pentaerythrityl Tetra-Di-t-Butyl Hydroxyhydrocinnamate, Phenoxyethanol, Ethylhexylglycerin, Acetyl Cedrene, Tetramethyl acetyloctahydronaphthalenes, Hexyl cinnamal, Linalyl Acetate, Linalool.
+Як використовувати
+Нанесіть невелику кількість крему на чисту шкіру рук і розподіліть легкими масажними рухами до поглинання. Використовуйте протягом дня за потреби.</description>
       </offer>
-      <offer id="3" available="true">
+      <offer id="3" available="false">
         <price>850</price>
-        <stock_quantity>9520</stock_quantity>
+        <stock_quantity>0</stock_quantity>
         <currencyId>UAH</currencyId>
         <categoryId>102</categoryId>
         <picture>https://byverba.api.keycrm.app/file-storage/thumbnails/byverba/uploads/2026-10-30/la2HD32p2lRvqIYrejBq0L6OlUxuWaaO.png</picture>
         <vendor>Verba Cosmetics</vendor>
         <article>LGC</article>
         <name_ua>Блиск для губ Coconut Paradise Verba Cosmetics 15мл</name_ua>
-        <description_ua>Блиск для губ Verba Cosmetics Coconut з пептидами та вітаміном C для декоративного макіяжу губ.</description_ua>
-        <param name="Тип засобу">Блиск для губ</param>
-        <param name="Призначення">Макіяж губ</param>
+        <description_ua>Опис: Блиск для губ Verba Cosmetics Coconut з пептидами та вітаміном C для декоративного макіяжу губ.
+Тип засобу: Блиск для губ
+Призначення: Макіяж губ
+Об'єм: 15 мл</description_ua>
+        <param name="Вид">Блиск для губ</param>
         <param name="Об'єм">15 мл</param>
         <name>Блиск для губ Coconut Paradise Verba Cosmetics 15мл</name>
-        <description>Блиск для губ Verba Cosmetics Coconut з пептидами та вітаміном C для декоративного макіяжу губ.</description>
+        <description>Опис: Блиск для губ Verba Cosmetics Coconut з пептидами та вітаміном C для декоративного макіяжу губ.
+Тип засобу: Блиск для губ
+Призначення: Макіяж губ
+Об'єм: 15 мл</description>
       </offer>
-      <offer id="1" available="true">
+      <offer id="1" available="false">
         <price>850</price>
-        <stock_quantity>9394</stock_quantity>
+        <stock_quantity>0</stock_quantity>
         <currencyId>UAH</currencyId>
         <categoryId>102</categoryId>
         <picture>https://byverba.api.keycrm.app/file-storage/thumbnails/byverba/uploads/2026-10-30/Uw2FtPT96i03pimM7CC5fR7yrX6kAzj4.png</picture>
         <vendor>Verba Cosmetics</vendor>
         <article>LGLECCPC</article>
         <name_ua>Блиск для губ Crystal Caramel Verba Cosmetics 15мл</name_ua>
-        <description_ua>Блиск для губ Verba Cosmetics Crystal Caramel з пептидами та вітаміном C для декоративного макіяжу губ.</description_ua>
-        <param name="Тип засобу">Блиск для губ</param>
-        <param name="Призначення">Макіяж губ</param>
+        <description_ua>Опис: Блиск для губ Verba Cosmetics Crystal Caramel з пептидами та вітаміном C для декоративного макіяжу губ.
+Тип засобу: Блиск для губ
+Призначення: Макіяж губ
+Об'єм: 15 мл</description_ua>
+        <param name="Вид">Блиск для губ</param>
         <param name="Об'єм">15 мл</param>
         <name>Блиск для губ Crystal Caramel Verba Cosmetics 15мл</name>
-        <description>Блиск для губ Verba Cosmetics Crystal Caramel з пептидами та вітаміном C для декоративного макіяжу губ.</description>
+        <description>Опис: Блиск для губ Verba Cosmetics Crystal Caramel з пептидами та вітаміном C для декоративного макіяжу губ.
+Тип засобу: Блиск для губ
+Призначення: Макіяж губ
+Об'єм: 15 мл</description>
       </offer>
     </offers>
   </shop>
