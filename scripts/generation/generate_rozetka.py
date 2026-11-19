@@ -7,6 +7,7 @@ from copy import deepcopy
 from pathlib import Path
 import xml.etree.ElementTree as ET
 from urllib.parse import urlsplit
+from marketplace_format import plain_description
 
 SOURCE = Path("pricelists/eva.xml")
 OUTPUT = Path("pricelists/rozetka.xml")
@@ -34,7 +35,8 @@ def convert(root):
         if offer.findtext("categoryId") not in categories:
             raise ValueError(f"Unknown category for offer {offer_id}")
         name_ua = (offer.findtext("name_ua") or "").strip()
-        description_ua = (offer.findtext("description_ua") or "").strip()
+        description_ua = plain_description(offer.findtext("description_ua") or "")
+        offer.find("description_ua").text = description_ua
         if not name_ua or not description_ua:
             raise ValueError(f"Missing Ukrainian product copy for offer {offer_id}")
         if name_ua in seen_names:
