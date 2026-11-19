@@ -10,8 +10,7 @@ from urllib.parse import quote, urlsplit
 from zoneinfo import ZoneInfo
 
 import requests
-from dynamic_attributes import custom_field_names, product_parameters
-from description_fields import parse_description
+from marketplace_fields import marketplace_fields, write_eva_xml
 
 BASE_URL = "https://openapi.keycrm.app/v1"
 OUTPUT = Path("pricelists/eva.xml")
@@ -142,7 +141,6 @@ def render_feed(categories, products, offers, stocks, custom_fields=None):
 
     by_id = {str(p["id"]): p for p in products if isinstance(p, dict) and p.get("id") is not None}
     by_stock = stock_lookup(stocks)
-    field_names = custom_field_names(custom_fields or [])
     root = ET.Element("yml_catalog", {"date": datetime.now(ZoneInfo("Europe/Kyiv")).strftime("%Y-%m-%d %H:%M")})
     shop = ET.SubElement(root, "shop")
     ET.SubElement(shop, "name").text = VENDOR
@@ -174,17 +172,13 @@ def render_feed(categories, products, offers, stocks, custom_fields=None):
         if not urls:
             raise ValueError(f"No public HTTPS image URL for {sku}; do not publish incomplete feed")
         quantity = by_stock.get(str(offer_id), available_stock(offer))
-        params = product_parameters(product, offer, field_names)
-        # The KeyCRM Description field can contain an editorial description
-        # followed by free-form key: value lines (e.g. "Об'єм: 15 мл").
-        # Explicit description attributes override the same attribute from
-        # other KeyCRM fields; no values are invented by the generator.
-        description, description_params = parse_description(product.get("description") or "")
-        params.update(description_params)
-        if not params:
-            print(f"Warning: SKU {sku} has no marketplace characteristics in KeyCRM")
+        enabled, params = marketplace_fields(product, custom_fields or [])
+        if not enabled:
+            quantity = 0
         product_name = str(product.get("name") or cfg["name"]).strip()
-        product_description = description or cfg["description"]
+        product_description = str(product.get("description") or cfg["description"]).strip()
+        if len(params) < 2:
+            print(f"Warning: SKU {sku} has fewer than two configured marketplace characteristics")
         cat_id = FEED_CATEGORIES[cfg["category"]][0]
         node = ET.SubElement(listing, "offer", {"id": str(offer_id), "available": str(quantity > 0).lower()})
         fields = {"price": format(price, "f"), "stock_quantity": str(quantity),
@@ -218,7 +212,7 @@ def main():
         get_all(session, "custom-fields", {"include": "options"}),
     )
     tmp = OUTPUT.with_suffix(".xml.tmp")
-    tree.write(tmp, encoding="utf-8", xml_declaration=True)
+    write_eva_xml(tree, tmp)
     tmp.replace(OUTPUT)
     print(f"EVA YML generated: {OUTPUT}; offers: {len(tree.getroot().findall('./shop/offers/offer'))}")
 
