@@ -88,6 +88,41 @@ class FeedTests(unittest.TestCase):
         self.assertEqual(cream.find("./param[@name=\"Об'єм\"]").text, "30 мл")
         self.assertEqual(len(cream.findall("param")), 3)
 
+    def test_manual_availability(self):
+        for flag, expected in (("false", "0"), ("true", "8")):
+            self.products[0]["description"] = "Опис: Крем\nНаявність: " + flag
+            root = g.render_feed(self.categories, self.products, self.offers, self.stocks).getroot()
+            cream = root.find("./shop/offers/offer[@id='4']")
+            self.assertEqual(cream.findtext("stock_quantity"), expected)
+            self.assertEqual(cream.get("available"), str(expected != "0").lower())
+            self.assertIsNone(cream.find("./param[@name='Наявність']"))
+
+    def test_manual_true_does_not_invent_stock(self):
+        self.products[1]["description"] = "Опис: Блиск\nНаявність: true"
+        root = g.render_feed(self.categories, self.products, self.offers, self.stocks).getroot()
+        gloss = root.find("./shop/offers/offer[@id='3']")
+        self.assertEqual(gloss.findtext("stock_quantity"), "0")
+        self.assertEqual(gloss.get("available"), "false")
+
+    def test_eva_cdata_and_rozetka_plain_text(self):
+        from tempfile import TemporaryDirectory
+        from generate_rozetka import convert
+        self.products[0]["description"] = "Опис: Крем & догляд\nПереваги продукту\n• М'якість\nНаявність: false"
+        tree = g.render_feed(self.categories, self.products, self.offers, self.stocks)
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "eva.xml"
+            g.write_eva_xml(tree, path)
+            self.assertIn("<![CDATA[<p>Крем &amp; догляд</p>", path.read_text(encoding="utf-8"))
+            eva = ET.parse(path).getroot()
+            cream = eva.find("./shop/offers/offer[@id='4']")
+            self.assertIn("<ul><li>", cream.findtext("description_ua"))
+            rozetka = convert(eva).getroot()
+            cream = rozetka.find("./shop/offers/offer[@id='4']")
+            self.assertEqual(cream.get("available"), "false")
+            self.assertEqual(cream.findtext("stock_quantity"), "0")
+            self.assertIn("Крем & догляд", cream.findtext("description_ua"))
+            self.assertNotIn("<p>", cream.findtext("description_ua"))
+
     def test_variant_overrides_product(self):
         self.offers[0]["properties"] = [{"name": "Тип засобу", "value": "Інший крем"}]
         root = g.render_feed(self.categories, self.products, self.offers, self.stocks,
