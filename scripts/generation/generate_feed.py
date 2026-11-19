@@ -12,6 +12,7 @@ from zoneinfo import ZoneInfo
 import requests
 from dynamic_attributes import custom_field_names, product_parameters
 from description_fields import parse_description
+from marketplace_format import extract_availability, write_eva_xml
 
 BASE_URL = "https://openapi.keycrm.app/v1"
 OUTPUT = Path("pricelists/eva.xml")
@@ -180,7 +181,13 @@ def render_feed(categories, products, offers, stocks, custom_fields=None):
         # Explicit description attributes override the same attribute from
         # other KeyCRM fields; no values are invented by the generator.
         description, description_params = parse_description(product.get("description") or "")
+        manual_available = extract_availability(description_params)
         params.update(description_params)
+        for key in list(params):
+            if key.strip().casefold() == "наявність":
+                del params[key]
+        if manual_available is False:
+            quantity = 0
         if not params:
             print(f"Warning: SKU {sku} has no marketplace characteristics in KeyCRM")
         product_name = str(product.get("name") or cfg["name"]).strip()
@@ -218,7 +225,7 @@ def main():
         get_all(session, "custom-fields", {"include": "options"}),
     )
     tmp = OUTPUT.with_suffix(".xml.tmp")
-    tree.write(tmp, encoding="utf-8", xml_declaration=True)
+    write_eva_xml(tree, tmp)
     tmp.replace(OUTPUT)
     print(f"EVA YML generated: {OUTPUT}; offers: {len(tree.getroot().findall('./shop/offers/offer'))}")
 
