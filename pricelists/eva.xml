@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><yml_catalog date="2026-11-21 04:08">
+<?xml version="1.0" encoding="utf-8"?><yml_catalog date="2026-11-21 11:42">
   <shop>
     <name>Verba Cosmetics</name>
     <currencies>
@@ -11,7 +11,7 @@
     <offers>
       <offer id="4" available="true">
         <price>490</price>
-        <stock_quantity>1934</stock_quantity>
+        <stock_quantity>1922</stock_quantity>
         <currencyId>UAH</currencyId>
         <categoryId>101</categoryId>
         <picture>https://byverba.api.keycrm.app/file-storage/thumbnails/byverba/uploads/2026-11-16/Saxvf46izetHqZM9vZNeHOR0vMEt26Ax.png</picture>
