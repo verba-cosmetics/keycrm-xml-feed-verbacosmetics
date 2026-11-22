@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<yml_catalog date="2026-11-22 11:43">
+<yml_catalog date="2026-11-22 13:53">
   <shop>
     <name>Verba Cosmetics</name>
     <currencies>
@@ -12,7 +12,7 @@
     <offers>
       <offer id="4" available="true">
         <price>490</price>
-        <stock_quantity>1829</stock_quantity>
+        <stock_quantity>1819</stock_quantity>
         <currencyId>UAH</currencyId>
         <categoryId>101</categoryId>
         <picture>https://byverba.api.keycrm.app/file-storage/thumbnails/byverba/uploads/2026-11-16/Saxvf46izetHqZM9vZNeHOR0vMEt26Ax.png</picture>
@@ -43,6 +43,7 @@ Aqua, Isopropyl Palmitate, Cetyl Palmitate, Cetearyl Alcohol, Glycerin, Glyceryl
 Нанесіть невелику кількість крему на чисту шкіру рук і розподіліть легкими масажними рухами до поглинання. Використовуйте протягом дня за потреби.</description_ua>
         <param name="Вид">Крем для рук</param>
         <param name="Об'єм">30 мл</param>
+        <param name="Країна виробництва">Україна</param>
         <name>Крем для рук Verba Cosmetics Cashmere Dream 30мл</name>
         <description>Verba Cosmetics Cashmere Dream — парфумований бар'єрний крем для рук із косметичної лінійки Юлії Верби, у якій сучасна естетика поєднується з турботою про себе.
 Cashmere Dream огортає шкіру ніжним ароматом мускусу та кашеміру, перетворюючи повсякденний догляд на особливий б'юті-ритуал. Формула з лецитином і 4D-гіалуроновою кислотою інтенсивно зволожує, живить та допомагає підтримувати природний захисний бар'єр шкіри рук.
