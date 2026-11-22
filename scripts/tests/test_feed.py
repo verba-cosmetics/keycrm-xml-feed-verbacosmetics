@@ -73,7 +73,14 @@ class FeedTests(unittest.TestCase):
         root = g.render_feed(self.categories, self.products, self.offers, self.stocks).getroot()
         cream = root.find("./shop/offers/offer[@id='4']")
         self.assertIsNotNone(cream)
-        self.assertEqual(cream.findall("param"), [])
+        # Country of manufacture is published for Cashmere Dream even when
+        # no custom CRM attributes exist. No other attributes are invented.
+        self.assertEqual(
+            [(p.get("name"), p.text) for p in cream.findall("param")],
+            [("Країна виробництва", "Україна")],
+        )
+        self.assertEqual(cream.get("available"), "false")
+        self.assertEqual(cream.findtext("stock_quantity"), "0")
 
     def test_direct_fields_and_plain_description(self):
         self.products[0]["description"] = "Крем для рук.\n**Переваги продукту**\n- Зволоження\nСклад: Aqua"
