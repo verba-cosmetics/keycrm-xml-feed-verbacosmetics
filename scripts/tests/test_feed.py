@@ -64,7 +64,7 @@ class FeedTests(unittest.TestCase):
                 self.assertIsNotNone(node.find(field))
             self.assertGreaterEqual(len(node.findall("param")), 2)
             self.assertGreaterEqual(len(node.findtext("description_ua")), 30)
-        self.assertEqual(root.find("./shop/offers/offer/param[@name=\"Об'єм\"]").text, "30 мл")
+        self.assertEqual(root.find("./shop/offers/offer/param[@name=\"Об'єм\"]").text, "30")
         ET.fromstring(ET.tostring(root, encoding="utf-8"))
 
     def test_missing_keycrm_characteristics_keeps_product(self):
@@ -108,6 +108,17 @@ class FeedTests(unittest.TestCase):
             rz = convert(eva).getroot()
             self.assertIn("Крем & догляд.", rz.findtext("./shop/offers/offer/description_ua"))
             self.assertNotIn("<p>", rz.findtext("./shop/offers/offer/description_ua"))
+
+    def test_eva_hand_care_catalog_parameters(self):
+        root = g.render_feed(self.categories, self.products, self.offers, self.stocks).getroot()
+        cream = root.find("./shop/offers/offer[@id='4']")
+        self.assertEqual(cream.find("./param[@name='Вид']").text, "Крем для рук")
+        self.assertEqual(cream.find("./param[@name=\"Об'єм\"]").text, "30")
+        self.assertEqual(cream.find("./param[@name='Країна виробництва']").text, "Україна")
+        for offer_id in ("3", "1"):
+            gloss = root.find(f"./shop/offers/offer[@id='{offer_id}']")
+            self.assertEqual(gloss.find("./param[@name=\"Об'єм\"]").text, "15")
+            self.assertIsNone(gloss.find("./param[@name='Країна виробництва']"))
 
     def test_missing_images_prevent_publish(self):
         self.products[0].pop("attachments_data")
