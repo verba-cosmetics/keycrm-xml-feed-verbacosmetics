@@ -34,6 +34,10 @@ def convert(root):
         seen_ids.add(offer_id)
         if offer.findtext("categoryId") not in categories:
             raise ValueError(f"Unknown category for offer {offer_id}")
+        # Rozetka retains readable units; EVA feeds use numeric attributes.
+        for param in offer.findall("param"):
+            if param.get("name") == "Об'єм" and (param.text or "").isdigit():
+                param.text += " мл"
         name_ua = (offer.findtext("name_ua") or "").strip()
         description_ua = plain_description(offer.findtext("description_ua") or "")
         offer.find("description_ua").text = description_ua
