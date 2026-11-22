@@ -5,9 +5,10 @@ stable offer/category IDs, inventory and photos; the EVA feed is unchanged.
 """
 from copy import deepcopy
 from pathlib import Path
+from xml.dom import minidom
 import xml.etree.ElementTree as ET
 from urllib.parse import urlsplit
-from marketplace_fields import plain_description
+from marketplace_fields import format_description
 
 SOURCE = Path("pricelists/eva.xml")
 OUTPUT = Path("pricelists/rozetka.xml")
@@ -39,7 +40,11 @@ def convert(root):
             if param.get("name") == "Об'єм" and (param.text or "").isdigit():
                 param.text += " мл"
         name_ua = (offer.findtext("name_ua") or "").strip()
-        description_ua = plain_description(offer.findtext("description_ua") or "")
+        # EVA already contains safely escaped HTML. Keep its paragraphs/headings/
+        # lists instead of flattening them into a single block of plain text.
+        description_ua = (offer.findtext("description_ua") or "").strip()
+        if description_ua and not description_ua.startswith(("<p>", "<ul>")):
+            description_ua = format_description(description_ua)
         offer.find("description_ua").text = description_ua
         if not name_ua or not description_ua:
             raise ValueError(f"Missing Ukrainian product copy for offer {offer_id}")
@@ -75,10 +80,23 @@ def convert(root):
     return ET.ElementTree(result)
 
 
+def write_rozetka_xml(tree, path):
+    """Wrap Rozetka HTML descriptions in CDATA without changing the EVA XML."""
+    doc = minidom.parseString(ET.tostring(tree.getroot(), encoding="utf-8"))
+    for field in ("description", "description_ua"):
+        for node in doc.getElementsByTagName(field):
+            html = "".join(child.data for child in node.childNodes
+                           if child.nodeType in (child.TEXT_NODE, child.CDATA_SECTION_NODE))
+            while node.firstChild:
+                node.removeChild(node.firstChild)
+            node.appendChild(doc.createCDATASection(html))
+    path.write_bytes(doc.toxml(encoding="utf-8"))
+
+
 def main():
     tree = convert(ET.parse(SOURCE).getroot())
     tmp = OUTPUT.with_suffix(".xml.tmp")
-    tree.write(tmp, encoding="utf-8", xml_declaration=True)
+    write_rozetka_xml(tree, tmp)
     tmp.replace(OUTPUT)
     print(f"Rozetka YML generated: {OUTPUT}; offers: {len(tree.findall('./shop/offers/offer'))}")
 
