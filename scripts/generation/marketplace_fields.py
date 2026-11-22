@@ -34,7 +34,8 @@ def marketplace_fields(product, definitions):
     if volume:
         if len(volume) != 1 or not volume[0].isdigit() or int(volume[0]) <= 0:
             raise ValueError("CT_1016 must be a positive integer in ml")
-        params["Об'єм"] = volume[0] + " мл"
+        # EVA attribute ID 100050 uses the numeric value (e.g. 30).
+        params["Об'єм"] = volume[0]
     for item in definitions:
         if not isinstance(item, dict):
             continue
