@@ -43,6 +43,13 @@ class RozetkaTests(unittest.TestCase):
         converted = convert(root).getroot()
         self.assertEqual(len(converted.findall("./shop/offers/offer")), 3)
 
+    def test_rozetka_volume_keeps_unit(self):
+        source = ET.fromstring(SOURCE)
+        cream = source.find("./shop/offers/offer[@id='4']")
+        ET.SubElement(cream, "param", {"name": "Об'єм"}).text = "30"
+        converted = convert(source).getroot()
+        self.assertEqual(converted.find("./shop/offers/offer[@id='4']/param[@name=\"Об'єм\"]").text, "30 мл")
+
     def test_bad_image_rejected(self):
         root = ET.fromstring(SOURCE)
         root.find("./shop/offers/offer/picture").text = "https://example.com/a+b.png"
