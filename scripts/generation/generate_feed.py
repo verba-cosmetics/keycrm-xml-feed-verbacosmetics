@@ -173,6 +173,9 @@ def render_feed(categories, products, offers, stocks, custom_fields=None):
             raise ValueError(f"No public HTTPS image URL for {sku}; do not publish incomplete feed")
         quantity = by_stock.get(str(offer_id), available_stock(offer))
         enabled, params = marketplace_fields(product, custom_fields or [])
+        if cfg["category"] == "cream":
+            # Country is confirmed for Cashmere Dream, not inferred for glosses.
+            params["Країна виробництва"] = "Україна"
         if not enabled:
             quantity = 0
         product_name = str(product.get("name") or cfg["name"]).strip()
