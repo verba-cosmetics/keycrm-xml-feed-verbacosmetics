@@ -65,7 +65,7 @@ class RozetkaTests(unittest.TestCase):
         converted = convert(source).getroot()
         self.assertEqual(
             converted.findtext("./shop/offers/offer[@id='4']/description_ua"),
-            "<p>Бар'єрний крем для щоденного догляду за шкірою рук.</p>",
+            "<p>Бар&#x27;єрний крем для щоденного догляду за шкірою рук.</p>",
         )
 
     def test_products_without_params_are_kept(self):
