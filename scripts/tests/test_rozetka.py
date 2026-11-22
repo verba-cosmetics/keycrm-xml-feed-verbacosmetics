@@ -1,11 +1,12 @@
 import sys
 from pathlib import Path
+from tempfile import TemporaryDirectory
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "generation"))
 
 import unittest
 import xml.etree.ElementTree as ET
 
-from generate_rozetka import convert
+from generate_rozetka import convert, write_rozetka_xml
 
 
 SOURCE = """<yml_catalog date="2026-11-05 17:55"><shop><name>Verba Cosmetics</name>
@@ -34,6 +35,38 @@ class RozetkaTests(unittest.TestCase):
             self.assertEqual(offer.findtext("name"), offer.findtext("name_ua"))
             self.assertEqual(offer.findtext("description"), offer.findtext("description_ua"))
         self.assertIsNone(source.find("./shop/offers/offer/name"))
+
+    def test_html_description_cdata_and_eva_source_untouched(self):
+        source = ET.fromstring(SOURCE)
+        cream = source.find("./shop/offers/offer[@id='4']")
+        html = "<p><strong>Переваги продукту</strong></p><ul><li>Зволоження &amp; догляд</li></ul>"
+        cream.find("description_ua").text = html
+
+        converted = convert(source)
+        result = converted.getroot()
+        self.assertEqual(result.find("./shop/offers/offer[@id='4']/description_ua").text, html)
+        self.assertEqual(result.find("./shop/offers/offer[@id='4']/description").text, html)
+        self.assertEqual(cream.findtext("description_ua"), html)
+        self.assertIsNone(cream.find("description"))
+
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "rozetka.xml"
+            write_rozetka_xml(converted, path)
+            output = path.read_text(encoding="utf-8")
+            self.assertIn(f"<description_ua><![CDATA[{html}]]></description_ua>", output)
+            self.assertIn(f"<description><![CDATA[{html}]]></description>", output)
+            self.assertEqual(
+                ET.parse(path).findtext("./shop/offers/offer[@id='4']/description_ua"),
+                html,
+            )
+
+    def test_plain_description_falls_back_to_html_paragraphs(self):
+        source = ET.fromstring(SOURCE)
+        converted = convert(source).getroot()
+        self.assertEqual(
+            converted.findtext("./shop/offers/offer[@id='4']/description_ua"),
+            "<p>Бар'єрний крем для щоденного догляду за шкірою рук.</p>",
+        )
 
     def test_products_without_params_are_kept(self):
         root = ET.fromstring(SOURCE)
